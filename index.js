@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
+const session = require("express-session");
 const connection = require("./database/database");
 
 const categoriesController = require("./categories/CategoriesController");
@@ -13,6 +14,16 @@ const User = require("./users/User");
 
 // View engine
 app.set("view engine", "ejs");
+
+// Sessions
+app.use(
+  session({
+    secret: "qualquercoisa",
+    cookie: { maxAge: 30000000 },
+    resave: true,
+    saveUninitialized: true,
+  })
+);
 
 // Static
 app.use(express.static("public"));
@@ -39,6 +50,27 @@ app.use("/", usersController);
 // app.get("/", (req, res) => {
 //   res.send("Bem vindo ao meu site");
 // });
+
+app.get("/session", (req, res) => {
+  req.session.treinamento = "Formação Node.js";
+  req.session.ano = 2019;
+  req.session.email = "danilo@gmail.com";
+  req.session.user = {
+    username: "victorlima",
+    email: "email@email.com",
+    id: 10,
+  };
+  res.send("Sessão gerada!");
+});
+
+app.get("/leitura", (req, res) => {
+  res.json({
+    treinamento: req.session.treinamento,
+    ano: req.session.ano,
+    email: req.session.email,
+    user: req.session.user,
+  });
+});
 
 app.get("/", (req, res) => {
   Article.findAll({
